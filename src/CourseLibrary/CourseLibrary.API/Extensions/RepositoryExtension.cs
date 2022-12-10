@@ -2,12 +2,14 @@
 
 using CourseLibrary.API.DbContexts;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
+using Microsoft.EntityFrameworkCore;
 
 namespace CourseLibrary.API.Extensions;
 
 public static class RepositoryExtension
 {
-    public static IServiceCollection CongigureRepositories(this IServiceCollection services)
+    public static IServiceCollection CongigureRepositories(this IServiceCollection services, IConfiguration Configuration)
     {
         services.AddScoped<ICourseLibraryService,
            CourseLibraryService>();
@@ -19,11 +21,10 @@ public static class RepositoryExtension
 
         services.AddDbContext<CourseLibraryContext>(options =>
         {
-        });
-        services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-
-        services.AddScoped<IValidator<AuthorModel>, AuthorValidator>();
-        services.AddScoped<IValidator<CourseModel>, CourseValidator>();
+            options.UseSqlServer(Configuration.GetConnectionString("CourseLibraryDatabase"));
+    });
+        services.AddScoped<IValidator<AuthorForCreationModel>, AuthorValidator>();
+        services.AddScoped<IValidator<CourseForCreationModel>, CourseValidator>();
         return services;
     }
 }

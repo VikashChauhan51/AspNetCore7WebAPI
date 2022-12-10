@@ -1,4 +1,5 @@
 ﻿
+using CourseLibrary.API.Entities;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -11,10 +12,10 @@ namespace CourseLibrary.API.Controllers
     public class AuthorController : ControllerBase
     {
 
-        private readonly IValidator<AuthorModel> _authorValidator;
+        private readonly IValidator<AuthorForCreationModel> _authorValidator;
         private readonly ICourseLibraryService _courseLibrary;
         private readonly IMapper _mapper;
-        public AuthorController(IValidator<AuthorModel> authorValidator, IMapper mapper, ICourseLibraryService courseLibrary)
+        public AuthorController(IValidator<AuthorForCreationModel> authorValidator, IMapper mapper, ICourseLibraryService courseLibrary)
         {
             _authorValidator = authorValidator ?? throw new ArgumentNullException(nameof(authorValidator));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
@@ -28,7 +29,7 @@ namespace CourseLibrary.API.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<AuthorModel>> Get( Guid authorId)
         {
-            Author? authorFromRepo = null;// await _courseLibrary.GetAuthorAsync(authorId);
+            Author? authorFromRepo =  await _courseLibrary.GetAuthorAsync(authorId);
 
             if (authorFromRepo == null)
             {
@@ -41,7 +42,7 @@ namespace CourseLibrary.API.Controllers
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status303SeeOther)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<AuthorModel>> Post(AuthorModel author)
+        public async Task<ActionResult<AuthorModel>> Post(AuthorForCreationModel author)
         {
             var result = await _authorValidator.ValidateAsync(author);
 
@@ -53,6 +54,7 @@ namespace CourseLibrary.API.Controllers
             }
 
             var authorEntity = _mapper.Map<Author>(author);
+            await _courseLibrary.AddAuthor(authorEntity);
 
             var authorToReturn = _mapper.Map<AuthorModel>(authorEntity);
 

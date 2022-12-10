@@ -14,4 +14,16 @@ public static class DateTimeOffsetExtensions
 
         return age;
     }
+    public static int GetCurrentAge(this DateOnly date)
+    {
+        var currentUtcDate = DateTime.UtcNow;
+        var currentDate = new DateOnly(currentUtcDate.Year, currentUtcDate.Month, currentUtcDate.Day);
+        int age = currentDate.Year - date.Year;
+        if (currentDate < date.AddYears(age))
+        {
+            age--;
+        }
+
+        return age;
+    }
 }

@@ -14,8 +14,9 @@ public class CourseLibraryService : ICourseLibraryService
     }
     async Task ICourseLibraryService.AddAuthor(Author author)
     {
+       
         _authorRepository.AddAuthor(author);
-       await _authorRepository.SaveAsync();
+        await _authorRepository.SaveAsync();
     }
 
     async Task ICourseLibraryService.AddCourse(Guid authorId, Course course)

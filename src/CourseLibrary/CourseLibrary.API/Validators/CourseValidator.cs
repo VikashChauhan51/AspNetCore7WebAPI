@@ -1,8 +1,9 @@
 ﻿
 namespace CourseLibrary.API.Validators;
 
-public class CourseValidator : AbstractValidator<CourseModel>
+public class CourseValidator : AbstractValidator<CourseForCreationModel>
 {
+
     public CourseValidator()
     {
         RuleFor(course => course.Title).NotNull().NotEmpty().Length(3, 100);

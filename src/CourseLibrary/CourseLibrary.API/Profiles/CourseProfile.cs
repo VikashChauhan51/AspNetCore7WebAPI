@@ -5,7 +5,8 @@ public class CourseProfile: Profile
 {
     public CourseProfile()
     {
-        CreateMap<Entities.Course, Models.CourseModel>();
-        CreateMap<Models.CourseForCreationModel, Entities.Course>();
+        CreateMap<Course, CourseModel>();
+        CreateMap<CourseForCreationModel,Course>();
+        CreateMap<CourseForUpdateModel, Course>().ReverseMap();
     }
 }

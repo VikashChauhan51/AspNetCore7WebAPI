@@ -20,7 +20,6 @@ public static class ServiceExtension {
         services.AddControllers(options =>
         {
             options.ReturnHttpNotAcceptable = true;
-            options.SslPort = 7212;
         }).ConfigureApiBehaviorOptions(options =>
         {
             options.InvalidModelStateResponseFactory = context =>
@@ -43,6 +42,22 @@ public static class ServiceExtension {
             setupAction.DefaultApiVersion = new ApiVersion(1, 0);
             setupAction.ReportApiVersions = true;
         });
+
+        services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
+        services.AddResponseCaching();
+
+        services.AddHttpCacheHeaders(
+            (expirationModelOptions) =>
+            {
+                expirationModelOptions.MaxAge = 60;
+                expirationModelOptions.CacheLocation =
+                    Marvin.Cache.Headers.CacheLocation.Private;
+            },
+            (validationModelOptions) =>
+            {
+                validationModelOptions.MustRevalidate = true;
+            });
 
         return services;
     }

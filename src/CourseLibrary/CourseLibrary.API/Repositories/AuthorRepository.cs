@@ -18,13 +18,13 @@ public class AuthorRepository : RepositoryBase, IAuthorRepository
         {
             throw new ArgumentNullException(nameof(author));
         }
-
-        // the repository fills the id (instead of using identity columns)
         author.Id = Guid.NewGuid();
 
         foreach (var course in author.Courses)
         {
             course.Id = Guid.NewGuid();
+            course.Author = author;
+            course.AuthorId = author.Id;
         }
 
         _context.Authors.Add(author);

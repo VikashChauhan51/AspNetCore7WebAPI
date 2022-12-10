@@ -16,7 +16,7 @@ public static class PipelineExtension
         app.UseHttpsRedirection();
 
         app.UseRouting();
-
+        app.UseHttpCacheHeaders();
         app.UseAuthentication();
 
         app.UseAuthorization();

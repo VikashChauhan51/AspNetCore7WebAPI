@@ -9,7 +9,8 @@ builder.Host.UseSerilog();
 
 builder.Services
     .CongigureServices()
-    .CongigureRepositories();
+    .CongigureRepositories(builder.Configuration);
+
 
 var app = builder.Build();
 app.UseRateLimiter();
