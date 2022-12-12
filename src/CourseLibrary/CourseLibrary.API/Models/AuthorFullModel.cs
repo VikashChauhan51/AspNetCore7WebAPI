@@ -2,9 +2,9 @@
 
 public record AuthorFullModel
 {
-    public Guid Id { get; set; }
-    public string FirstName { get; set; } = string.Empty;
-    public string LastName { get; set; } = string.Empty;
-    public DateTime DateOfBirth { get; set; }
-    public string MainCategory { get; set; } = string.Empty;
+    public Guid Id { get; init; }
+    public string FirstName { get; init; } = string.Empty;
+    public string LastName { get; init; } = string.Empty;
+    public DateTime DateOfBirth { get; init; }
+    public string MainCategory { get; init; } = string.Empty;
 }
