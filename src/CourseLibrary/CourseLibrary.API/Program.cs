@@ -15,4 +15,4 @@ builder.Services
 var app = builder.Build();
 app.UseRateLimiter();
 // Configure the HTTP request pipeline.
-app.CongigurePipeline().Run();  
+app.CongigurePipeline(Log.Logger).Run();  
