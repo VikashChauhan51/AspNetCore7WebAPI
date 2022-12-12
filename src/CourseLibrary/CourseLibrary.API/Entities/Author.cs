@@ -12,7 +12,7 @@ public class Author
     public string FirstName { get; set; } = string.Empty;
     public string LastName { get; set; } = string.Empty;
 
-    public DateOnly DateOfBirth { get; set; }
+    public DateTime DateOfBirth { get; set; }
     public string MainCategory { get; set; } = string.Empty;
 
     public ICollection<Course> Courses { get; set; } = new List<Course>();
@@ -28,6 +28,7 @@ public class AuthorConfiguration : IEntityTypeConfiguration<Author>
         builder.HasKey(a => a.Id);
         builder.Property(a => a.DateOfBirth).IsRequired();
         builder.Property(a => a.MainCategory).IsRequired().HasMaxLength(50);
-        builder.HasMany(a => a.Courses).WithOne();
+        builder.Navigation(a => a.Courses);
+        builder.ToTable("Authors");
     }
 }

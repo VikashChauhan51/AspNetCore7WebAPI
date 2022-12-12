@@ -18,7 +18,7 @@ public class AuthorValidator : AbstractValidator<AuthorForCreationModel>
 
     }
 
-    protected bool BeValidAge(DateTimeOffset date)
+    protected bool BeValidAge(DateTime date)
     {
         int currentYear = DateTimeOffset.Now.Year;
         int dobYear = date.Year;

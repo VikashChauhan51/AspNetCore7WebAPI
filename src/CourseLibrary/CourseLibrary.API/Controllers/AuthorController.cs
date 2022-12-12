@@ -40,7 +40,7 @@ namespace CourseLibrary.API.Controllers
         }
 
         [HttpPost]
-        [ProducesResponseType(StatusCodes.Status303SeeOther)]
+        [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<AuthorModel>> Post(AuthorForCreationModel author)
         {

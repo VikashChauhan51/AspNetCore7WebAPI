@@ -26,6 +26,9 @@ public class CourseConfiguration : IEntityTypeConfiguration<Course>
         builder.Property(c => c.Description).HasMaxLength(300);
         builder.HasKey(c => c.Id);
         builder.Property(c => c.AuthorId).IsRequired();
-        builder.HasOne(c => c.Author).WithOne();
+        builder.HasOne(c => c.Author).WithMany(c=>c.Courses).HasForeignKey(c=>c.AuthorId).IsRequired();
+        builder.Navigation(c => c.Author);
+        builder.HasIndex(c => c.AuthorId);
+        builder.ToTable("Courses");
     }
 }

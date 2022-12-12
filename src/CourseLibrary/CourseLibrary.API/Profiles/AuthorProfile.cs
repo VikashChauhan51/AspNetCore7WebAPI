@@ -3,7 +3,7 @@
 
 namespace CourseLibrary.API.Profiles;
 
-public class AuthorProfile: Profile
+public class AuthorProfile : Profile
 {
     public AuthorProfile()
     {

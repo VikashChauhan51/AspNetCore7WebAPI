@@ -20,5 +20,6 @@ public class CourseLibraryContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AuthorConfiguration).Assembly);
+        base.OnModelCreating(modelBuilder);
     }
 }

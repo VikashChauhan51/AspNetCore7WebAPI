@@ -1,5 +1,5 @@
 ﻿namespace CourseLibrary.API.Models;
-public class AuthorForCreationWithDateOfDeathModel: AuthorForCreationModel
+public record AuthorForCreationWithDateOfDeathModel: AuthorForCreationModel
 {
-    public DateTimeOffset? DateOfDeath { get; set; }
+    public DateTime? DateOfDeath { get; set; }
 }

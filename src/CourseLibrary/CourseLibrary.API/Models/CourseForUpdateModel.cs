@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
 namespace CourseLibrary.API.Models;
-public class CourseForUpdateModel: CourseForManipulationModel
+public record CourseForUpdateModel: CourseForManipulationModel
 {
     [Required(ErrorMessage = "You should fill out a description.")]
     public override string Description
