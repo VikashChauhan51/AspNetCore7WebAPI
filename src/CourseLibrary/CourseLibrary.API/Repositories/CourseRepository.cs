@@ -34,20 +34,16 @@ public class CourseRepository : RepositoryBase, ICourseRepository
         _context.Courses.Remove(course);
     }
 
-    public async Task<Course?> GetCourseAsync(Guid authorId, Guid courseId)
+    public async Task<Course?> GetCourseAsync( Guid courseId)
     {
-        if (authorId == Guid.Empty)
-        {
-            throw new ArgumentNullException(nameof(authorId));
-        }
-
+       
         if (courseId == Guid.Empty)
         {
             throw new ArgumentNullException(nameof(courseId));
         }
 
         return await _context.Courses
-          .Where(c => c.AuthorId == authorId && c.Id == courseId).FirstOrDefaultAsync();
+          .Where(c => c.Id == courseId).FirstOrDefaultAsync();
 
     }
 

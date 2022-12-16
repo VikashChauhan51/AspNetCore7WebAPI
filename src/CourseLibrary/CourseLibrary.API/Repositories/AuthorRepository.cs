@@ -58,7 +58,7 @@ public class AuthorRepository : RepositoryBase, IAuthorRepository
         }
 
 
-        return await _context.Authors.FirstOrDefaultAsync(a => a.Id == authorId);
+        return await _context.Authors.Include(x=>x.Courses).FirstOrDefaultAsync(a => a.Id == authorId);
 
     }
 

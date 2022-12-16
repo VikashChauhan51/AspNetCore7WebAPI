@@ -12,22 +12,9 @@ public class AuthorValidator : AbstractValidator<AuthorForCreationModel>
         _courseValidator = courseValidator ?? throw new ArgumentNullException(nameof(courseValidator));
         RuleFor(author => author.FirstName).NotNull().NotEmpty().Length(3, 50);
         RuleFor(author => author.LastName).NotNull().NotEmpty().Length(3, 50);
-        RuleFor(author => author.DateOfBirth).Must(BeValidAge).WithMessage("Invalid {PropertyName}");
+        RuleFor(author => author.DateOfBirth).Must(AgeHelper.BeValidAge).WithMessage("Invalid {PropertyName}");
         RuleFor(author => author.MainCategory).NotNull().NotEmpty();
         RuleForEach(author => author.Courses).SetValidator(_courseValidator);
 
-    }
-
-    protected bool BeValidAge(DateTime date)
-    {
-        int currentYear = DateTimeOffset.Now.Year;
-        int dobYear = date.Year;
-        int diff = currentYear - dobYear;
-        if (diff > 18 && diff < 80)
-        {
-            return true;
-        }
-
-        return false;
     }
 }

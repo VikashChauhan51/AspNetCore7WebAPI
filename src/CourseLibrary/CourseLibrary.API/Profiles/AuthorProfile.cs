@@ -14,11 +14,14 @@ public class AuthorProfile : Profile
                opt.MapFrom(src => src.DateOfBirth.GetCurrentAge()));
 
 
+        CreateMap<Author, AuthorForUpdateModel>();
+
         CreateMap<AuthorForCreationModel, Author>();
 
         CreateMap<Author, AuthorFullModel>();
 
         CreateMap<AuthorForCreationWithDateOfDeathModel, Author>();
+        CreateMap<AuthorForUpdateModel, Author>();
 
     }
 }

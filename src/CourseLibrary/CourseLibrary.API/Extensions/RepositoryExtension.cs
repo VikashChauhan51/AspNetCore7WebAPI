@@ -25,6 +25,7 @@ public static class RepositoryExtension
     });
         services.AddScoped<IValidator<AuthorForCreationModel>, AuthorValidator>();
         services.AddScoped<IValidator<CourseForCreationModel>, CourseValidator>();
+        services.AddScoped<IValidator<AuthorForUpdateModel>, AuthorUpdateValidator>();
         return services;
     }
 }

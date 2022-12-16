@@ -5,7 +5,7 @@ namespace CourseLibrary.API.Services;
 public interface ICourseLibraryService
 {
     Task<IEnumerable<Course>> GetCoursesAsync(Guid authorId);
-    Task<Course?> GetCourseAsync(Guid authorId, Guid courseId);
+    Task<Course?> GetCourseAsync( Guid courseId);
     Task AddCourse(Guid authorId, Course course);
     Task UpdateCourse(Course course);
     Task DeleteCourse(Course course);

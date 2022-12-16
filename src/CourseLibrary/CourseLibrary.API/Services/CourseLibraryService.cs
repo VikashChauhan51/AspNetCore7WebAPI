@@ -57,9 +57,9 @@ public class CourseLibraryService : ICourseLibraryService
         return _authorRepository.GetAuthorsAsync(authorIds);
     }
 
-    Task<Course?> ICourseLibraryService.GetCourseAsync(Guid authorId, Guid courseId)
+    Task<Course?> ICourseLibraryService.GetCourseAsync( Guid courseId)
     {
-        return _courseRepository.GetCourseAsync(authorId, courseId);
+        return _courseRepository.GetCourseAsync(courseId);
     }
 
     Task<IEnumerable<Course>> ICourseLibraryService.GetCoursesAsync(Guid authorId)
