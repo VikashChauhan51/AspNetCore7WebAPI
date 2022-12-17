@@ -83,7 +83,7 @@ public class AuthorRepository : RepositoryBase, IAuthorRepository
 
     public void UpdateAuthor(Author author)
     {
-        // no code in this implementation
+        _context.Authors.Update(author);
     }
 
 

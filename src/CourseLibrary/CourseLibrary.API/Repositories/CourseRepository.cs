@@ -47,6 +47,21 @@ public class CourseRepository : RepositoryBase, ICourseRepository
 
     }
 
+    public async Task<Course?> GetCourseAsync(Guid authorId, Guid courseId)
+    {
+        if (authorId == Guid.Empty)
+        {
+            throw new ArgumentNullException(nameof(authorId));
+        }
+        if (courseId == Guid.Empty)
+        {
+            throw new ArgumentNullException(nameof(courseId));
+        }
+
+        return await _context.Courses
+          .Where(c => c.Id == courseId && c.AuthorId == authorId).FirstOrDefaultAsync();
+    }
+
     public async Task<IEnumerable<Course>> GetCoursesAsync(Guid authorId)
     {
         if (authorId == Guid.Empty)
@@ -66,6 +81,6 @@ public class CourseRepository : RepositoryBase, ICourseRepository
 
     public void UpdateCourse(Course course)
     {
-        // no code in this implementation
+        _context.Courses.Update(course);
     }
 }

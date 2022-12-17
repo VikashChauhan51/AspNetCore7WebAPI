@@ -9,6 +9,7 @@ public class CourseLibraryContext : DbContext
        : base(options)
     {
         base.ChangeTracker.LazyLoadingEnabled = false;
+        base.ChangeTracker.AutoDetectChangesEnabled = false;
     }
 
     // base DbContext constructor ensures that Books and Authors are not null after

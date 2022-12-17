@@ -1,6 +1,8 @@
 ﻿
 
 
+using Marvin.Cache.Headers;
+
 namespace CourseLibrary.API.Controllers;
 
 [ApiController]
@@ -36,6 +38,8 @@ public class AuthorController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [HttpCacheExpiration(CacheLocation = CacheLocation.Public, MaxAge = 1000)]
+    [HttpCacheValidation(MustRevalidate = false)]
     public async Task<ActionResult<AuthorModel>> Get(Guid authorId)
     {
         Author? authorFromRepo = await _courseLibrary.GetAuthorAsync(authorId);
@@ -83,7 +87,7 @@ public class AuthorController : ControllerBase
     /// Update Author information without Courses.
     /// </summary>
     /// <param name="authorId"><see cref="Guid"/></param>
-    /// <param name="patchDocument"><see cref="JsonPatchDocument"/></param>
+    /// <param name="patchDocument"><see cref="JsonPatchDocument{AuthorForUpdateModel}"/></param>
     /// <returns>No content.</returns>
     /// <remarks>
     /// Sample request:

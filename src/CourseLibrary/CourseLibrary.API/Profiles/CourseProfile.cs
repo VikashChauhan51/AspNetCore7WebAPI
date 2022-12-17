@@ -7,6 +7,6 @@ public class CourseProfile: Profile
     {
         CreateMap<Course, CourseModel>();
         CreateMap<CourseForCreationModel,Course>();
-        CreateMap<CourseForUpdateModel, Course>().ReverseMap();
+        CreateMap<Course, CourseForCreationModel>();
     }
 }

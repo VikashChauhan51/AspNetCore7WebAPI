@@ -12,6 +12,21 @@ public class CourseLibraryService : ICourseLibraryService
         _authorRepository = authorRepository ?? throw new ArgumentNullException(nameof(authorRepository));
         _courseRepository = courseRepository ?? throw new ArgumentNullException(nameof(courseRepository));
     }
+
+    public async Task AddAuthors(IEnumerable<Author> authors)
+    {
+        foreach (var author in authors)
+        {
+            _authorRepository.AddAuthor(author);
+        }
+        await _authorRepository.SaveAsync();
+    }
+
+    public Task<Course?> GetCourseAsync(Guid authorId, Guid courseId)
+    {
+        return _courseRepository.GetCourseAsync(authorId, courseId);
+    }
+
     async Task ICourseLibraryService.AddAuthor(Author author)
     {
        

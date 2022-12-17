@@ -16,4 +16,6 @@ public interface ICourseLibraryService
     Task DeleteAuthor(Author author);
     Task UpdateAuthor(Author author);
     Task<bool> AuthorExistsAsync(Guid authorId);
+    Task<Course?> GetCourseAsync(Guid authorId, Guid courseId);
+    Task AddAuthors(IEnumerable<Author> authors);
 }

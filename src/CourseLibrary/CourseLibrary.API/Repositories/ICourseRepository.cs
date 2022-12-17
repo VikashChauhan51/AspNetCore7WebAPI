@@ -10,5 +10,6 @@ namespace CourseLibrary.API.Repositories
         Task<IEnumerable<Course>> GetCoursesAsync(Guid authorId);
         void UpdateCourse(Course course);
         Task<IEnumerable<Course>> GetCoursesAsync();
+        Task<Course?> GetCourseAsync(Guid authorId, Guid courseId);
     }
 }
