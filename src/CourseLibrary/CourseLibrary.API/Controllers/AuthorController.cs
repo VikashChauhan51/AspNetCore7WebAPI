@@ -1,6 +1,4 @@
 ﻿
-
-
 using Marvin.Cache.Headers;
 
 namespace CourseLibrary.API.Controllers;
@@ -62,7 +60,7 @@ public class AuthorController : ControllerBase
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<AuthorModel>> Post(AuthorForCreationModel author)
+    public async Task<ActionResult<AuthorModel>> Post([FromBody] AuthorForCreationModel author)
     {
         var result = await _authorValidator.ValidateAsync(author);
 
@@ -128,7 +126,7 @@ public class AuthorController : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> Patch(Guid authorId, JsonPatchDocument<AuthorForUpdateModel> patchDocument)
+    public async Task<IActionResult> Patch(Guid authorId, [FromBody] JsonPatchDocument<AuthorForUpdateModel> patchDocument)
     {
 
 
@@ -157,6 +155,7 @@ public class AuthorController : ControllerBase
 
         return NoContent();
     }
+
     /// <summary>
     /// Remove Author with Courses.
     /// </summary>

@@ -1,5 +1,4 @@
 ﻿
-using CourseLibrary.API.Entities;
 using Marvin.Cache.Headers;
 
 namespace CourseLibrary.API.Controllers;
@@ -79,7 +78,7 @@ public class CourseController : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> Patch(Guid courseId, JsonPatchDocument<CourseForCreationModel> patchDocument)
+    public async Task<IActionResult> Patch(Guid courseId, [FromBody] JsonPatchDocument<CourseForCreationModel> patchDocument)
     {
         Course? courseFromRepo = await _courseLibrary.GetCourseAsync(courseId);
 

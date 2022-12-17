@@ -1,6 +1,4 @@
 ﻿using Marvin.Cache.Headers;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 
 namespace CourseLibrary.API.Controllers;
 
@@ -60,8 +58,8 @@ public class AuthorCoursesController : ControllerBase
 
         var courseToReturn = _mapper.Map<CourseModel>(courseEntity);
 
-        return CreatedAtRoute("GetCourseForAuthor",
-            new { authorId, courseId = courseToReturn.Id },
+        return CreatedAtRoute("GetCoursesForAuthor",
+            new { authorId },
             courseToReturn);
     }
 
