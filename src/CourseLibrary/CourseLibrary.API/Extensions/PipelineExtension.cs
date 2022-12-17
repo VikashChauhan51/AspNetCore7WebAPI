@@ -21,10 +21,7 @@ public static class PipelineExtension
 
         app.UseAuthorization();
 
-        app.UseEndpoints(endpoints =>
-        {
-            endpoints.MapControllers();
-        });
+        app.MapControllers();
 
         return app;
     }

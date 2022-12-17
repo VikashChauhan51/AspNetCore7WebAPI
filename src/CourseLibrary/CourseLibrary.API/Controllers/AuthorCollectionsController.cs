@@ -25,6 +25,12 @@ public class AuthorCollectionsController : ControllerBase
     /// </summary>
     /// <param name="authorIds"><see cref="IEnumerable{Guid}"/></param>
     /// <returns>Returns the <see cref="IEnumerable{AuthorModel}"/> information.</returns>
+    /// <remarks>
+    /// Sample request:
+    /// 
+    ///     Get /authorcollections/(3fa85f64-5717-4562-b3fc-2c963f66afa6,3fa85f64-5717-4562-b3fc-2c963f66afa7)
+    ///     
+    /// </remarks>
     /// <response code="200">Returns the <see cref="IEnumerable{AuthorModel}"/> information.</response>
     /// <response code="400"><paramref name="authorIds"/> are invalid.</response>
     /// <response code="404">Authors are not found for provided <paramref name="authorIds"/>.</response>
@@ -34,7 +40,7 @@ public class AuthorCollectionsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [HttpCacheExpiration(CacheLocation = CacheLocation.Public, MaxAge = 1000)]
     [HttpCacheValidation(MustRevalidate = false)]
-    public async Task<ActionResult<IEnumerable<AuthorModel>>>Get([FromRoute] IEnumerable<Guid> authorIds)
+    public async Task<ActionResult<IEnumerable<AuthorModel>>>Get([ModelBinder(BinderType = typeof(ArrayModelBinder))][FromRoute] IEnumerable<Guid> authorIds)
     {
         var authorEntities = await _courseLibrary
             .GetAuthorsAsync(authorIds);

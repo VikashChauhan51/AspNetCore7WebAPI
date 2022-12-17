@@ -54,9 +54,9 @@ public class AuthorController : ControllerBase
     /// Add new Author with Courses.
     /// </summary>
     /// <param name="author"><see cref="AuthorForCreationModel"/></param>
-    /// <returns>A newly created Author</returns>
-    /// <response code="201">Returns the newly created Author</response>
-    /// <response code="400"><see cref="AuthorForCreationModel"/> is null or invalid.</response>
+    /// <returns>A newly created <see cref="AuthorModel"/></returns>
+    /// <response code="201">Returns the newly created <see cref="CourseModel"/></response>
+    /// <response code="400"><paramref name="author"/> is null or invalid.</response>
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]

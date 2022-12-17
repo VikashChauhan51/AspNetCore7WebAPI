@@ -4,7 +4,7 @@ using System.Reflection;
 
 namespace CourseLibrary.API.Helpers;
 
-public class ArrayModelBinder
+public class ArrayModelBinder : IModelBinder
 {
     public Task BindModelAsync(ModelBindingContext bindingContext)
     {
