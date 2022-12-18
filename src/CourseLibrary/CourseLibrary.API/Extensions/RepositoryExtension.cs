@@ -13,11 +13,15 @@ public static class RepositoryExtension
     {
         services.AddScoped<ICourseLibraryService,
            CourseLibraryService>();
+        services.AddScoped<IUserService,
+          UserService>();
 
         services.AddScoped<IAuthorRepository,
          AuthorRepository>();
         services.AddScoped<ICourseRepository,
          CourseRepository>();
+        services.AddScoped<IUserRepository,
+         UserRepository>();
 
         services.AddDbContext<CourseLibraryContext>(options =>
         {
@@ -26,6 +30,7 @@ public static class RepositoryExtension
         services.AddScoped<IValidator<AuthorForCreationModel>, AuthorValidator>();
         services.AddScoped<IValidator<CourseForCreationModel>, CourseValidator>();
         services.AddScoped<IValidator<AuthorForUpdateModel>, AuthorUpdateValidator>();
+        services.AddScoped<IValidator<AuthenticationModel>, AuthenticationValidator>();
         return services;
     }
 }

@@ -1,13 +1,20 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using CourseLibrary.API.Configurations;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using Newtonsoft.Json.Serialization;
 using System.Reflection;
+using System.Text;
 using System.Threading.RateLimiting;
 using static System.Net.Mime.MediaTypeNames;
 
 namespace CourseLibrary.API.Extensions;
-public static class ServiceExtension {
-    public static IServiceCollection CongigureServices(this IServiceCollection services)
+public static class ServiceExtension
+{
+    public static IServiceCollection CongigureServices(this IServiceCollection services, IConfiguration Configuration)
     {
 
         services.AddRateLimiter(_ => _
@@ -33,7 +40,11 @@ public static class ServiceExtension {
                     Application.Xml
                     }
                 };
-        }).AddNewtonsoftJson().AddXmlSerializerFormatters();
+        }).AddNewtonsoftJson(setupAction =>
+        {
+            setupAction.SerializerSettings.ContractResolver =
+                new CamelCasePropertyNamesContractResolver();
+        }).AddXmlSerializerFormatters();
 
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         services.AddEndpointsApiExplorer();
@@ -41,7 +52,51 @@ public static class ServiceExtension {
         {
             var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
             options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
+
+            options.AddSecurityDefinition("CourseLibraryApiBearerAuth", new OpenApiSecurityScheme()
+            {
+                Type = SecuritySchemeType.Http,
+                Scheme = "Bearer",
+                Description = "Input a valid token to access this API"
+            });
+
+            options.AddSecurityRequirement(new OpenApiSecurityRequirement
+            {
+             {
+                new OpenApiSecurityScheme
+               {
+                  Reference = new OpenApiReference {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "CourseLibraryApiBearerAuth" }
+               }, new List<string>() }
+             });
         });
+
+        services.AddAuthentication("Bearer")
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new()
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = Configuration["Authentication:Issuer"],
+            ValidAudience = Configuration["Authentication:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.ASCII.GetBytes(Configuration["Authentication:SecretForKey"]!))
+        };
+    }
+    );
+
+        services.AddAuthorization(options =>
+        {
+            options.AddPolicy("MustBeAuthenticated", policy =>
+            {
+                policy.RequireAuthenticatedUser();
+                 
+            });
+        });
+
         services.AddApiVersioning(setupAction =>
         {
             setupAction.AssumeDefaultVersionWhenUnspecified = true;
@@ -64,7 +119,10 @@ public static class ServiceExtension {
             {
                 validationModelOptions.MustRevalidate = true;
             });
+        services.AddOptions();
 
+        var section = Configuration.GetSection("Authentication");
+        services.Configure<AuthenticationConfiguration>(section);
         return services;
     }
 }

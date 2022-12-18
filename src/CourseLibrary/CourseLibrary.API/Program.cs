@@ -8,7 +8,7 @@ builder.Host.UseSerilog();
 // Add services to the container.
 
 builder.Services
-    .CongigureServices()
+    .CongigureServices(builder.Configuration)
     .CongigureRepositories(builder.Configuration);
 
 

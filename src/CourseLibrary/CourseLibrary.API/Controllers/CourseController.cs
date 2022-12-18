@@ -1,10 +1,12 @@
 ﻿
 using Marvin.Cache.Headers;
+using Microsoft.AspNetCore.Authorization;
 
 namespace CourseLibrary.API.Controllers;
 
 
 [ApiController]
+[Authorize]
 [ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/course")]
 public class CourseController : ControllerBase
@@ -32,6 +34,7 @@ public class CourseController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [HttpCacheExpiration(CacheLocation = CacheLocation.Public, MaxAge = 1000)]
     [HttpCacheValidation(MustRevalidate = false)]
     public async Task<ActionResult<CourseModel>> Get(Guid courseId)
@@ -78,6 +81,7 @@ public class CourseController : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Patch(Guid courseId, [FromBody] JsonPatchDocument<CourseForCreationModel> patchDocument)
     {
         Course? courseFromRepo = await _courseLibrary.GetCourseAsync(courseId);

@@ -1,8 +1,10 @@
 ﻿using Marvin.Cache.Headers;
+using Microsoft.AspNetCore.Authorization;
 
 namespace CourseLibrary.API.Controllers;
 
 [ApiController]
+[Authorize]
 [ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/courses")]
 public class AuthorCoursesController : ControllerBase
@@ -32,6 +34,7 @@ public class AuthorCoursesController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<IEnumerable<CourseModel>>> Get(Guid authorId)
     {
         if (!await _courseLibrary.AuthorExistsAsync(authorId))
@@ -57,6 +60,7 @@ public class AuthorCoursesController : ControllerBase
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<CourseModel>> Post(Guid authorId, CourseForCreationModel course)
     {
 
@@ -99,6 +103,7 @@ public class AuthorCoursesController : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Put(Guid authorId, Guid courseId, CourseForCreationModel course)
     {
         var result = await _courseValidator.ValidateAsync(course);
@@ -151,6 +156,7 @@ public class AuthorCoursesController : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult> Delete(Guid authorId, Guid courseId)
     {
         if (!await _courseLibrary.AuthorExistsAsync(authorId))
