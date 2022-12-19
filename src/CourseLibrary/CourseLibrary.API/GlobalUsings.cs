@@ -11,3 +11,4 @@ global using AutoMapper;
 global using FluentValidation.AspNetCore;
 global using Microsoft.AspNetCore.JsonPatch;
 global using Microsoft.AspNetCore.Mvc;
+global using CourseLibrary.API.Hateoas;

@@ -1,6 +1,8 @@
 ﻿
+
 using Marvin.Cache.Headers;
 using Microsoft.AspNetCore.Authorization;
+
 
 namespace CourseLibrary.API.Controllers;
 
@@ -15,15 +17,18 @@ public class AuthorController : ControllerBase
     private readonly IValidator<AuthorForUpdateModel> _authorUpdateValidator;
     private readonly ICourseLibraryService _courseLibrary;
     private readonly IMapper _mapper;
+    private readonly LinkGenerator _linkGenerator;
+
     public AuthorController(IValidator<AuthorForCreationModel> authorValidator,
         IMapper mapper,
         ICourseLibraryService courseLibrary,
-        IValidator<AuthorForUpdateModel> authorUpdateValidator)
+        IValidator<AuthorForUpdateModel> authorUpdateValidator, LinkGenerator linkGenerator)
     {
         _authorValidator = authorValidator ?? throw new ArgumentNullException(nameof(authorValidator));
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _courseLibrary = courseLibrary ?? throw new ArgumentNullException(nameof(courseLibrary));
         _authorUpdateValidator = authorUpdateValidator ?? throw new ArgumentNullException(nameof(authorUpdateValidator));
+        _linkGenerator = linkGenerator ?? throw new ArgumentNullException(nameof(linkGenerator));
     }
 
     /// <summary>
@@ -35,6 +40,7 @@ public class AuthorController : ControllerBase
     /// <response code="400"><paramref name="authorId"/> is invalid.</response>
     /// <response code="404">Author is not found for provided <paramref name="authorId"/>.</response>
     [HttpGet("{authorId}", Name = "GetAuthor")]
+    [HttpHead]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -50,7 +56,15 @@ public class AuthorController : ControllerBase
             return NotFound();
         }
 
-        return Ok(_mapper.Map<AuthorModel>(authorFromRepo));
+        var authorLinks = CreateLinksForAuthor(authorFromRepo.Id);
+        var author = _mapper.Map<AuthorModel>(authorFromRepo);
+
+        var result = new LinkWrapper<AuthorModel>
+        {
+            Value = author,
+            Links = authorLinks
+        };
+        return Ok(result);
     }
 
     /// <summary>
@@ -60,7 +74,7 @@ public class AuthorController : ControllerBase
     /// <returns>A newly created <see cref="AuthorModel"/></returns>
     /// <response code="201">Returns the newly created <see cref="CourseModel"/></response>
     /// <response code="400"><paramref name="author"/> is null or invalid.</response>
-    [HttpPost]
+    [HttpPost(Name = "AddAuthor")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -80,9 +94,15 @@ public class AuthorController : ControllerBase
 
         var authorToReturn = _mapper.Map<AuthorModel>(authorEntity);
 
+        var authorLinks = CreateLinksForAuthor(authorToReturn.Id);
+        var response = new LinkWrapper<AuthorModel>
+        {
+            Value = authorToReturn,
+            Links = authorLinks
+        };
         return CreatedAtRoute("GetAuthor",
             new { authorId = authorToReturn.Id },
-            authorToReturn);
+            response);
     }
 
     /// <summary>
@@ -126,7 +146,7 @@ public class AuthorController : ControllerBase
     /// <response code="204">Author information updated.</response>
     /// <response code="404">Author is not found for provided <paramref name="authorId"/>.</response>
     /// <response code="400"><see cref="AuthorForUpdateModel"/> is null or invalid.</response>
-    [HttpPatch("{authorId}")]
+    [HttpPatch("{authorId}", Name = "UpdateAuthor")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -158,6 +178,7 @@ public class AuthorController : ControllerBase
 
         await _courseLibrary.UpdateAuthor(authorFromRepo);
 
+
         return NoContent();
     }
 
@@ -169,7 +190,7 @@ public class AuthorController : ControllerBase
     /// <response code="204">Author deleted.</response>
     /// <response code="400"><paramref name="authorId"/> is invalid.</response>
     /// <response code="404">Author is not found for provided <paramref name="authorId"/>.</response>
-    [HttpDelete("{authorId}")]
+    [HttpDelete("{authorId}", Name = "DeleteAuthor")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -186,6 +207,38 @@ public class AuthorController : ControllerBase
         await _courseLibrary.DeleteAuthor(authorFromRepo);
 
         return NoContent();
+    }
+
+    private IEnumerable<Link> CreateLinksForAuthor(Guid authorId)
+    {
+        return new List<Link> {
+         new Link
+         {
+             Href= _linkGenerator.GetUriByAction(HttpContext, values: new { authorId })!,
+             Rel= "self",
+             Method= "GET"
+         },
+        new Link
+        {
+            Href=_linkGenerator.GetUriByAction(HttpContext) !,
+             Rel="create_author",
+             Method="POST"
+        },
+        new Link
+        {
+            Href= _linkGenerator.GetUriByAction(HttpContext, values : new { authorId })!,
+              Rel="update_author",
+              Method="PATCH"
+        },
+        new Link
+        {
+            Href= _linkGenerator.GetUriByAction(HttpContext, values : new { authorId })!,
+             Rel= "delete_author",
+              Method="DELETE"
+        }
+
+        };
+
     }
 
 }

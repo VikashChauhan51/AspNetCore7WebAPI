@@ -1,5 +1,7 @@
-﻿using Marvin.Cache.Headers;
+﻿
+using Marvin.Cache.Headers;
 using Microsoft.AspNetCore.Authorization;
+
 
 namespace CourseLibrary.API.Controllers;
 
@@ -44,7 +46,17 @@ public class AuthorCoursesController : ControllerBase
 
         var coursesForAuthorFromRepo = await _courseLibrary
             .GetCoursesAsync(authorId);
-        return Ok(_mapper.Map<IEnumerable<CourseModel>>(coursesForAuthorFromRepo));
+        var courses = _mapper.Map<IEnumerable<CourseModel>>(coursesForAuthorFromRepo);
+        var courseswithLinks = CreateCourseWithLinks(courses);
+        var linksForAuthor = CreateLinksForAuthor(authorId);
+
+        var response = new LinkCollectionWrapper<LinkWrapper<CourseModel>>
+        {
+            Value = courseswithLinks,
+            Links = linksForAuthor
+
+        };
+        return Ok(response);
     }
 
     /// <summary>
@@ -83,10 +95,22 @@ public class AuthorCoursesController : ControllerBase
         await _courseLibrary.AddCourse(authorId, courseEntity);
 
         var courseToReturn = _mapper.Map<CourseModel>(courseEntity);
+        var linksForCourse = CreateLinksForCourse(courseToReturn.Id);
+        var courseWithLinks = new LinkWrapper<CourseModel>
+        {
+            Value = courseToReturn,
+            Links = linksForCourse
+        };
+        var linksForAuthor = CreateLinksForAuthor(authorId);
+        var response = new LinkWrapper<LinkWrapper<CourseModel>>
+        {
+            Value = courseWithLinks,
+            Links = linksForAuthor
 
+        };
         return CreatedAtRoute("GetCoursesForAuthor",
             new { authorId },
-            courseToReturn);
+            response);
     }
 
     /// <summary>
@@ -99,7 +123,7 @@ public class AuthorCoursesController : ControllerBase
     /// <response code="204">Course information updated.</response>
     /// <response code="404">Author is not found for provided <paramref name="authorId"/>.</response>
     /// <response code="400"><paramref name="course"/> is null or invalid.</response>
-    [HttpPut("{authorId}")]
+    [HttpPut("{authorId}", Name = "UpdateAuthorCourse")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -152,7 +176,7 @@ public class AuthorCoursesController : ControllerBase
     /// <response code="204">Author deleted.</response>
     /// <response code="400"><paramref name="authorId"/> or <paramref name="courseId"/> are invalid.</response>
     /// <response code="404">Author is not found for provided <paramref name="authorId"/> or Course is not found for provided <paramref name="courseId"/> .</response>
-    [HttpDelete("{authorId}")]
+    [HttpDelete("{authorId}",Name ="DeleteAuthorCourse")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -175,5 +199,73 @@ public class AuthorCoursesController : ControllerBase
         await _courseLibrary.DeleteCourse(courseForAuthorFromRepo);
 
         return NoContent();
+    }
+
+    private IEnumerable<Link> CreateLinksForAuthor(Guid authorId)
+    {
+        return new List<Link> {
+            new Link
+            {
+             Href= Url.Link("GetCoursesForAuthor",  values: new { authorId })!,
+             Rel= "self",
+             Method= "GET"
+            },
+            new Link
+            {
+            Href=Url.Link("CreateCourseForAuthor", values: new { authorId })!,
+             Rel="create_author_course",
+             Method="POST"
+            },
+            new Link
+            {
+            Href= Url.Link("UpdateAuthorCourse",  values : new { authorId })!,
+              Rel="update_author_course",
+                Method="PATCH"
+            },
+            new Link
+            {
+            Href= Url.Link("DeleteAuthorCourse",  values : new { authorId })!,
+             Rel= "delete_author_course",
+              Method="DELETE"
+        }
+
+        };
+
+    }
+
+    private IEnumerable<LinkWrapper<CourseModel>> CreateCourseWithLinks(IEnumerable<CourseModel> courses)
+    {
+        var list = new List<LinkWrapper<CourseModel>>();
+        foreach (var course in courses)
+        {
+            var courseLinks = CreateLinksForCourse(course.Id);
+            list.Add(new LinkWrapper<CourseModel>
+            {
+                Value = course,
+                Links = courseLinks
+            });
+
+        }
+
+        return list;
+    }
+    private IEnumerable<Link> CreateLinksForCourse(Guid courseId)
+    {
+        return new List<Link> {
+            new Link
+            {
+             Href= Url.Link("GetCourse", values: new { courseId })!,
+             Rel= "self",
+             Method= "GET"
+            },
+            new Link
+            {
+            Href= Url.Link("UpdateCourse", values : new { courseId })!,
+              Rel="update_course",
+                Method="PATCH"
+            }
+
+        };
+
     }
 }

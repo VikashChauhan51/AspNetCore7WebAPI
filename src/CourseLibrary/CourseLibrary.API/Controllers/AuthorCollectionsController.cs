@@ -2,6 +2,7 @@
 using Marvin.Cache.Headers;
 using Microsoft.AspNetCore.Authorization;
 
+
 namespace CourseLibrary.API.Controllers;
 
 [ApiController]
@@ -16,7 +17,7 @@ public class AuthorCollectionsController : ControllerBase
     public AuthorCollectionsController(IValidator<AuthorForCreationModel> authorValidator,
         IMapper mapper,
         ICourseLibraryService courseLibrary)
-	{
+    {
         _authorValidator = authorValidator ?? throw new ArgumentNullException(nameof(authorValidator));
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _courseLibrary = courseLibrary ?? throw new ArgumentNullException(nameof(courseLibrary));
@@ -44,7 +45,7 @@ public class AuthorCollectionsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [HttpCacheExpiration(CacheLocation = CacheLocation.Public, MaxAge = 1000)]
     [HttpCacheValidation(MustRevalidate = false)]
-    public async Task<ActionResult<IEnumerable<AuthorModel>>>Get([ModelBinder(BinderType = typeof(ArrayModelBinder))][FromRoute] IEnumerable<Guid> authorIds)
+    public async Task<ActionResult<IEnumerable<AuthorModel>>> Get([ModelBinder(BinderType = typeof(ArrayModelBinder))][FromRoute] IEnumerable<Guid> authorIds)
     {
         var authorEntities = await _courseLibrary
             .GetAuthorsAsync(authorIds);
@@ -56,7 +57,15 @@ public class AuthorCollectionsController : ControllerBase
 
         // map
         var authorsToReturn = _mapper.Map<IEnumerable<AuthorModel>>(authorEntities);
-        return Ok(authorsToReturn);
+        var authorsWithLinks = CreateLinksForAuthors(authorsToReturn);
+        var links = CreateLinksForAuthors(authorIds, false);
+        var response = new LinkCollectionWrapper<LinkWrapper<AuthorModel>>
+        {
+            Value = authorsWithLinks,
+            Links = links
+
+        };
+        return Ok(response);
     }
 
     /// <summary>
@@ -67,11 +76,11 @@ public class AuthorCollectionsController : ControllerBase
     /// <response code="201">Returns the newly created Authors</response>
     /// <response code="400"><see cref="AuthorForCreationModel"/> are null or invalid.</response>
 
-    [HttpPost]
+    [HttpPost(Name = "AddAuthorCollection")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<ActionResult<IEnumerable<AuthorModel>>> Post([FromBody]IEnumerable<AuthorForCreationModel> authorCollection)
+    public async Task<ActionResult<IEnumerable<AuthorModel>>> Post([FromBody] IEnumerable<AuthorForCreationModel> authorCollection)
     {
         if (!authorCollection?.Any() ?? false)
         {
@@ -95,9 +104,90 @@ public class AuthorCollectionsController : ControllerBase
 
         var authorCollectionToReturn = _mapper.Map<IEnumerable<AuthorModel>>(authorEntities);
         var authorIdsAsString = string.Join(",", authorCollectionToReturn.Select(a => a.Id));
+        var authorsWithLinks = CreateLinksForAuthors(authorCollectionToReturn);
+        var links = CreateLinksForAuthors(authorCollectionToReturn.Select(a => a.Id).ToList(), true);
+        var response = new LinkCollectionWrapper<LinkWrapper<AuthorModel>>
+        {
+            Value = authorsWithLinks,
+            Links = links
 
+        };
         return CreatedAtRoute("GetAuthorCollection",
           new { authorIds = authorIdsAsString },
-          authorCollectionToReturn);
+          response);
     }
+
+    private IEnumerable<LinkWrapper<AuthorModel>> CreateLinksForAuthors(IEnumerable<AuthorModel> authors)
+    {
+        var list = new List<LinkWrapper<AuthorModel>>();
+        foreach (var author in authors)
+        {
+            var authorLinks = CreateLinksForAuthor(author.Id);
+            list.Add(new LinkWrapper<AuthorModel>
+            {
+                Value = author,
+                Links = authorLinks
+            });
+
+        }
+
+        return list;
+
+    }
+
+    private IEnumerable<Link> CreateLinksForAuthor(Guid authorId)
+    {
+        return new List<Link> {
+         new Link
+         {
+             Href=Url.Link("GetAuthor",  values: new { authorId })!,
+             Rel= "self",
+             Method= "GET"
+         },
+        new Link
+        {
+            Href=Url.Link("AddAuthor",null)!,
+             Rel="create_author",
+             Method="POST"
+        },
+        new Link
+        {
+            Href= Url.Link("UpdateAuthor", values : new { authorId })!,
+              Rel="update_author",
+              Method="PATCH"
+        },
+        new Link
+        {
+            Href= Url.Link("DeleteAuthor",  values : new { authorId })!,
+             Rel= "delete_author",
+              Method="DELETE"
+        }
+
+        };
+
+    }
+
+    private IEnumerable<Link> CreateLinksForAuthors(IEnumerable<Guid> authorIds, bool AddIds)
+    {
+        var links = new List<Link>();
+        var href = Url.Link("GetAuthorCollection", values: AddIds ? new { authorIds } : null)!;
+        var authorIdsAsString = string.Join(",", authorIds.Select(a => a));
+        links.Add(new Link
+        {
+            Href = $"{href.Split('(')[0]}({authorIdsAsString})",
+            Rel = "self",
+            Method = "GET"
+        });
+
+        links.Add(new Link
+        {
+            Href = Url.Link("AddAuthorCollection", null)!,
+            Rel = "create_authors",
+            Method = "POST"
+        });
+
+        return links;
+
+    }
+
 }

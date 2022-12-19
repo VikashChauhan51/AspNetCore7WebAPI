@@ -1,6 +1,8 @@
 ﻿
+
 using Marvin.Cache.Headers;
 using Microsoft.AspNetCore.Authorization;
+
 
 namespace CourseLibrary.API.Controllers;
 
@@ -45,8 +47,15 @@ public class CourseController : ControllerBase
         {
             return NotFound();
         }
+        var courseLinks = CreateLinksForCourse(courseId);
+        var course = _mapper.Map<CourseModel>(courseFromRepo);
+        var response = new LinkWrapper<CourseModel>
+        {
+            Value = course,
+            Links = courseLinks
+        };
 
-        return Ok(_mapper.Map<CourseModel>(courseFromRepo));
+        return Ok(response);
     }
     /// <summary>
     ///  Update course information.
@@ -77,7 +86,7 @@ public class CourseController : ControllerBase
     /// <response code="204">Course information updated.</response>
     /// <response code="404">Course is not found for provided <paramref name="courseId"/>.</response>
     /// <response code="400"><see cref="CourseForCreationModel"/> is null or invalid.</response>
-    [HttpPatch("{courseId}")]
+    [HttpPatch("{courseId}",Name = "UpdateCourse")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -110,5 +119,24 @@ public class CourseController : ControllerBase
         await _courseLibrary.UpdateCourse(courseFromRepo);
 
         return NoContent();
+    }
+    private IEnumerable<Link> CreateLinksForCourse(Guid courseId)
+    {
+        return new List<Link> {
+            new Link
+            {
+             Href= Url.Link("GetCourse", values: new { courseId })!,
+             Rel= "self",
+             Method= "GET"
+            },
+            new Link
+            {
+            Href= Url.Link("UpdateCourse", values : new { courseId })!,
+              Rel="update_course",
+                Method="PATCH"
+            }
+
+        };
+
     }
 }
