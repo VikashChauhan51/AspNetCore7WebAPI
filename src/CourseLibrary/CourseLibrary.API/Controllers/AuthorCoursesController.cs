@@ -31,6 +31,7 @@ public class AuthorCoursesController : ControllerBase
     /// <response code="400"><paramref name="authorId"/> is invalid.</response>
     /// <response code="404">Author is not found for provided <paramref name="authorId"/>.</response>
     [HttpGet("{authorId}", Name = "GetCoursesForAuthor")]
+    [HttpHead]
     [HttpCacheExpiration(CacheLocation = CacheLocation.Public, MaxAge = 1000)]
     [HttpCacheValidation(MustRevalidate = false)]
     [ProducesResponseType(StatusCodes.Status200OK)]

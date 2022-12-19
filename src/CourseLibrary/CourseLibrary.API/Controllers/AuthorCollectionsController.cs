@@ -39,6 +39,7 @@ public class AuthorCollectionsController : ControllerBase
     /// <response code="400"><paramref name="authorIds"/> are invalid.</response>
     /// <response code="404">Authors are not found for provided <paramref name="authorIds"/>.</response>
     [HttpGet("({authorIds})", Name = "GetAuthorCollection")]
+    [HttpHead]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]

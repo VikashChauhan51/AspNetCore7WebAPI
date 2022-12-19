@@ -33,6 +33,7 @@ public class CourseController : ControllerBase
     /// <response code="400"><paramref name="courseId"/> is invalid.</response>
     /// <response code="404">Author is not found for provided <paramref name="courseId"/>.</response>
     [HttpGet("{courseId}", Name = "GetCourse")]
+    [HttpHead]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
