@@ -44,8 +44,6 @@ public class AuthorCollectionsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [HttpCacheExpiration(CacheLocation = CacheLocation.Public, MaxAge = 1000)]
-    [HttpCacheValidation(MustRevalidate = false)]
     public async Task<ActionResult<IEnumerable<AuthorModel>>> Get([ModelBinder(BinderType = typeof(ArrayModelBinder))][FromRoute] IEnumerable<Guid> authorIds)
     {
         var authorEntities = await _courseLibrary

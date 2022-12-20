@@ -47,11 +47,13 @@ public class AuthenticationController : ControllerBase
         var signingCredentials = new SigningCredentials(
             securityKey, SecurityAlgorithms.HmacSha256);
 
-        var claimsForToken = new List<Claim>();
-        claimsForToken.Add(new Claim("sub", user.Id.ToString()));
-        claimsForToken.Add(new Claim("given_name", user.FirstName));
-        claimsForToken.Add(new Claim("family_name", user.LastName));
-        claimsForToken.Add(new Claim("email", user.Email));
+        var claimsForToken = new List<Claim>
+        {
+            new Claim("sub", user.Id.ToString()),
+            new Claim("given_name", user.FirstName),
+            new Claim("family_name", user.LastName),
+            new Claim("email", user.Email)
+        };
 
         var jwtSecurityToken = new JwtSecurityToken(
             _authenticationConfiguration.Issuer,

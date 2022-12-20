@@ -45,8 +45,6 @@ public class AuthorController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [HttpCacheExpiration(CacheLocation = CacheLocation.Public, MaxAge = 1000)]
-    [HttpCacheValidation(MustRevalidate = false)]
     public async Task<ActionResult<AuthorModel>> Get(Guid authorId)
     {
         Author? authorFromRepo = await _courseLibrary.GetAuthorAsync(authorId);

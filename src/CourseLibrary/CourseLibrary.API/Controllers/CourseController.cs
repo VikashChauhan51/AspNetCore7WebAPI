@@ -38,8 +38,6 @@ public class CourseController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [HttpCacheExpiration(CacheLocation = CacheLocation.Public, MaxAge = 1000)]
-    [HttpCacheValidation(MustRevalidate = false)]
     public async Task<ActionResult<CourseModel>> Get(Guid courseId)
     {
         Course? courseFromRepo = await _courseLibrary.GetCourseAsync(courseId);

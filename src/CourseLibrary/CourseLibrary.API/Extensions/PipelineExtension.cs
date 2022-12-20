@@ -15,6 +15,7 @@ public static class PipelineExtension
         app.ConfigureExceptionHandler(logger);
         app.UseHttpsRedirection();
 
+        app.UseResponseCaching();
         app.UseRouting();
         app.UseHttpCacheHeaders();
         app.UseAuthentication();

@@ -18,6 +18,19 @@ public static class ServiceExtension
     public static IServiceCollection CongigureServices(this IServiceCollection services, IConfiguration Configuration)
     {
 
+        services.AddHttpCacheHeaders(
+            (expirationModelOptions) =>
+            {
+                expirationModelOptions.MaxAge = 60;
+                expirationModelOptions.CacheLocation =
+                    Marvin.Cache.Headers.CacheLocation.Public;
+            },
+            (validationModelOptions) =>
+            {
+                validationModelOptions.MustRevalidate = true;
+            });
+
+        services.AddResponseCaching();
         services.AddRateLimiter(_ => _
        .AddFixedWindowLimiter(policyName: "fixed", options =>
        {
@@ -30,6 +43,8 @@ public static class ServiceExtension
         services.AddControllers(options =>
         {
             options.ReturnHttpNotAcceptable = true;
+            options.CacheProfiles.Add("120SecondsCacheProfile",
+                new() { Duration = 120 });
         }).ConfigureApiBehaviorOptions(options =>
         {
             options.InvalidModelStateResponseFactory = context =>
@@ -56,6 +71,15 @@ public static class ServiceExtension
             {
                 newtonsoftJsonOutputFormatter.SupportedMediaTypes
                     .Add("application/vnd.marvin.hateoas+json");
+            }
+
+            var xmlOutputFormatter = config.OutputFormatters
+                  .OfType<XmlSerializerOutputFormatter>()?.FirstOrDefault();
+
+            if (xmlOutputFormatter != null)
+            {
+                xmlOutputFormatter.SupportedMediaTypes
+                    .Add("application/vnd.marvin.hateoas+xml");
             }
         });
 
@@ -119,19 +143,7 @@ public static class ServiceExtension
 
         services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
-        services.AddResponseCaching();
-
-        services.AddHttpCacheHeaders(
-            (expirationModelOptions) =>
-            {
-                expirationModelOptions.MaxAge = 60;
-                expirationModelOptions.CacheLocation =
-                    Marvin.Cache.Headers.CacheLocation.Private;
-            },
-            (validationModelOptions) =>
-            {
-                validationModelOptions.MustRevalidate = true;
-            });
+        
         services.AddOptions();
 
         var section = Configuration.GetSection("Authentication");
