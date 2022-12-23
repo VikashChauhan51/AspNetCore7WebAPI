@@ -9,6 +9,7 @@ namespace CourseLibrary.API.Controllers;
 
 [ApiController]
 [Authorize]
+[ProducesResponseType(StatusCodes.Status401Unauthorized)]
 [ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/course")]
 public class CourseController : ControllerBase

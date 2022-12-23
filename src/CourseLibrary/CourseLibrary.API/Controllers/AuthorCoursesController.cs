@@ -1,12 +1,13 @@
 ﻿
 using Marvin.Cache.Headers;
 using Microsoft.AspNetCore.Authorization;
-
+using Microsoft.AspNetCore.Http;
 
 namespace CourseLibrary.API.Controllers;
 
 [ApiController]
 [Authorize]
+[ProducesResponseType(StatusCodes.Status401Unauthorized)]
 [ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/courses")]
 public class AuthorCoursesController : ControllerBase
@@ -122,6 +123,7 @@ public class AuthorCoursesController : ControllerBase
     /// <param name="course"><see cref="CourseForCreationModel"/></param>
     /// <returns>No content</returns>
     /// <response code="204">Course information updated.</response>
+    /// <response code="201">Course information added.</response>
     /// <response code="404">Author is not found for provided <paramref name="authorId"/>.</response>
     /// <response code="400"><paramref name="course"/> is null or invalid.</response>
     [HttpPut("{authorId}", Name = "UpdateAuthorCourse")]
@@ -129,6 +131,8 @@ public class AuthorCoursesController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesDefaultResponseType]
     public async Task<IActionResult> Put(Guid authorId, Guid courseId, CourseForCreationModel course)
     {
         var result = await _courseValidator.ValidateAsync(course);

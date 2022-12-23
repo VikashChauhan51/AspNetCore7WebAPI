@@ -1,6 +1,10 @@
 ﻿using CourseLibrary.API.Configurations;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Abstractions;
+using Microsoft.AspNetCore.Mvc.ApiExplorer;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.AspNetCore.Mvc.Formatters;
+using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
@@ -40,11 +44,28 @@ public static class ServiceExtension
            options.QueueLimit = 2;
        }));
 
-        services.AddControllers(options =>
+        services.AddControllers(configure =>
         {
-            options.ReturnHttpNotAcceptable = true;
-            options.CacheProfiles.Add("120SecondsCacheProfile",
+
+            configure.ReturnHttpNotAcceptable = true;
+            configure.CacheProfiles.Add("120SecondsCacheProfile",
                 new() { Duration = 120 });
+
+            configure.Filters.Add(
+       new ProducesResponseTypeAttribute(
+           StatusCodes.Status400BadRequest));
+            configure.Filters.Add(
+                new ProducesResponseTypeAttribute(
+                    StatusCodes.Status406NotAcceptable));
+            configure.Filters.Add(
+                new ProducesResponseTypeAttribute(
+                    StatusCodes.Status500InternalServerError));
+            configure.Filters.Add(new ProducesDefaultResponseTypeAttribute());
+            configure.Filters.Add(
+              new ConsumesAttribute("application/json", "application/json-patch+json", "application/vnd.vik.hateoas+json", "application/*+json"));
+            configure.Filters.Add(
+             new ProducesAttribute("application/json", "application/vnd.vik.hateoas+json", "application/xml", "application/vnd.vik.hateoas+xml"));
+
         }).ConfigureApiBehaviorOptions(options =>
         {
             options.InvalidModelStateResponseFactory = context =>
@@ -70,7 +91,7 @@ public static class ServiceExtension
             if (newtonsoftJsonOutputFormatter != null)
             {
                 newtonsoftJsonOutputFormatter.SupportedMediaTypes
-                    .Add("application/vnd.marvin.hateoas+json");
+                    .Add("application/vnd.vik.hateoas+json");
             }
 
             var xmlOutputFormatter = config.OutputFormatters
@@ -79,16 +100,40 @@ public static class ServiceExtension
             if (xmlOutputFormatter != null)
             {
                 xmlOutputFormatter.SupportedMediaTypes
-                    .Add("application/vnd.marvin.hateoas+xml");
+                    .Add("application/vnd.vik.hateoas+xml");
             }
+
+            var jsonOutputFormatter = config.OutputFormatters
+                  .OfType<NewtonsoftJsonOutputFormatter>().FirstOrDefault();
+
+            if (jsonOutputFormatter != null)
+            {
+                // remove text/json as it isn't the approved media type
+                // for working with JSON at API level
+                if (jsonOutputFormatter.SupportedMediaTypes.Contains("text/json"))
+                {
+                    jsonOutputFormatter.SupportedMediaTypes.Remove("text/json");
+                }
+            }
+
+        });
+        services.AddApiVersioning(setupAction =>
+        {
+            setupAction.AssumeDefaultVersionWhenUnspecified = true;
+            setupAction.DefaultApiVersion = new ApiVersion(1, 0);
+            setupAction.ReportApiVersions = true;
+        });
+        services.AddVersionedApiExplorer(setupAction =>
+        {
+            setupAction.GroupNameFormat = "'v'VV";
         });
 
-        // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+        var apiVersionDescriptionProvider =services.BuildServiceProvider().GetService<IApiVersionDescriptionProvider>();
+
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen(options =>
         {
-            var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-            options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
+           
 
             options.AddSecurityDefinition("CourseLibraryApiBearerAuth", new OpenApiSecurityScheme()
             {
@@ -107,6 +152,52 @@ public static class ServiceExtension
                     Id = "CourseLibraryApiBearerAuth" }
                }, new List<string>() }
              });
+
+            foreach (var description in
+            apiVersionDescriptionProvider!.ApiVersionDescriptions)
+            {
+                options.SwaggerDoc(
+                    $"LibraryOpenAPISpecification{description.GroupName}", new()
+                    {
+                        Title = "Library API",
+                        Version = description.ApiVersion.ToString(),
+                        Description = "Through this API you can access authors and their courses.",
+                        Contact = new()
+                        {
+                            Name = "Vikash Chauhan",
+                            Email="SampleAPI@github.com",
+                            Url = new Uri("https://github.com/VikashChauhan51")
+                        },
+                        License = new()
+                        {
+                            Name = "MIT License",
+                            Url = new Uri("https://opensource.org/licenses/MIT")
+                        }
+                    });
+            }
+
+            options.DocInclusionPredicate((documentName, apiDescription)
+                =>
+            {
+                var actionApiVersionModel = apiDescription.ActionDescriptor
+                   .GetApiVersionModel(ApiVersionMapping.Explicit | ApiVersionMapping.Implicit);
+
+                if (actionApiVersionModel == null)
+                {
+                    return true;
+                }
+
+                if (actionApiVersionModel.DeclaredApiVersions.Any())
+                {
+                    return actionApiVersionModel.DeclaredApiVersions.Any(v =>
+                    $"LibraryOpenAPISpecificationv{v}" == documentName);
+                }
+                return actionApiVersionModel.ImplementedApiVersions.Any(v =>
+                    $"LibraryOpenAPISpecificationv{v}" == documentName);
+            });
+
+            var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+            options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
         });
 
         services.AddAuthentication("Bearer")
@@ -130,20 +221,13 @@ public static class ServiceExtension
             options.AddPolicy("MustBeAuthenticated", policy =>
             {
                 policy.RequireAuthenticatedUser();
-                 
-            });
-        });
 
-        services.AddApiVersioning(setupAction =>
-        {
-            setupAction.AssumeDefaultVersionWhenUnspecified = true;
-            setupAction.DefaultApiVersion = new ApiVersion(1, 0);
-            setupAction.ReportApiVersions = true;
+            });
         });
 
         services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
-        
+
         services.AddOptions();
 
         var section = Configuration.GetSection("Authentication");

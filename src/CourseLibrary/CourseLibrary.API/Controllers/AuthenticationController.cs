@@ -6,6 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.AspNetCore.Http;
 
 namespace CourseLibrary.API.Controllers;
 
@@ -25,6 +26,10 @@ public class AuthenticationController : ControllerBase
         _authenticationValidator = authenticationValidator ?? throw new ArgumentNullException(nameof(authenticationValidator));
     }
     [HttpPost("authenticate")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesDefaultResponseType]
     public async Task<ActionResult<string>> Post(AuthenticationModel authentication)
     {
         var result = await _authenticationValidator.ValidateAsync(authentication);
